@@ -73,7 +73,7 @@ generarArchivos( char* ruta )
 		printf("\n\tIngresa la cadena a ingresar en el archivo:\t");
 		fflush(stdin);
 		scanf("%s",cadena);
-		printf("%s",direccion);
+		printf("\n\tSe ha guardado el archivo en:\n\t %s\n",direccion);
 		a = open (direccion, O_CREAT|O_WRONLY,0777);//Crea el archivo
 		write(a,cadena,strlen(cadena));//Escribe la cadena ingresada en el archivo
 		close(a);//Cierra el archivo
