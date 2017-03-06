@@ -68,11 +68,11 @@ generarArchivos( char* ruta )
 		fflush(stdin);
 		printf("\nIngresa el nombre del archivo %d:\t", i+1);
 		fflush(stdin);
-		scanf("%s",archivo);
+		scanf("%*c%[^\n]",archivo);
 		strcat(direccion,archivo);
 		printf("\n\tIngresa la cadena a ingresar en el archivo:\t");
 		fflush(stdin);
-		scanf("%s",cadena);
+		scanf("%*c%[^\n]",cadena);
 		printf("\n\tSe ha guardado el archivo en:\n\t %s\n",direccion);
 		a = open (direccion, O_CREAT|O_WRONLY,0777);//Crea el archivo
 		write(a,cadena,strlen(cadena));//Escribe la cadena ingresada en el archivo
