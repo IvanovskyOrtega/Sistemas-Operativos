@@ -11,13 +11,8 @@
 
 /**
   Autor: Ivan Ortega Victoriano
-  
   Este programa se encarga de copiar los archivos de un directorio especificado
-  a otro directorio destino, haciendo uso de hilos y llamadas al sistema del 
-  sistema operativo Linux.
-  
-  Compilación: gcc archivosConHilos.c -o archLinux -lpthread -Wall
-  
+  a otro directorio destino, haciendo uso de hilos y llamadas al sistema.
 */
 #define BUF_SIZE 8192		// Se define un tamaño de búffer para la lectura de archivos
 
@@ -32,9 +27,9 @@ void *hiloDirectorio (void *arg);	// Función de argumento para el hilo
 void *
 hiloDirectorio (void *arg)
 {
-  int input_fd, output_fd;	/* Descriptores de archivo de entrada y salida */
-  ssize_t ret_in, ret_out;	/* Numero de bytes regresados por read() y write() */
-  char buffer[BUF_SIZE];	/* Buffer de caractéres */
+  int input_fd, output_fd;	// Descriptores de archivo de entrada y salida
+  ssize_t ret_in, ret_out;	// Numero de bytes regresados por read() y write()
+  char buffer[BUF_SIZE];	// Buffer de caractéres
   pthread_t idThread;		// Creamos un identificador de hilo
   DIR *dir;			// Apuntador de tipo struct DIR
   struct dirent *dirEntry;	// Apuntador de tipo struct dirent
@@ -84,7 +79,7 @@ hiloDirectorio (void *arg)
 	  printf (" %s\n", dirEntry->d_name);
 	  sprintf (destino, "%s/%s", directorios->destino, dirEntry->d_name);	// Guardamos la ruta del archivo de origen
 	  //printf ("%s\n", destino);
-	  /* Crea descriptor del archivo de entrada */
+	  // Crea descriptor del archivo de entrada
 	  input_fd = open (name, O_RDONLY);	// Se abre el archivo en modo de lectura
 	  if (input_fd == -1)
 	    {
@@ -92,7 +87,7 @@ hiloDirectorio (void *arg)
 	      return NULL;
 	    }
 
-	  /* Crea descriptor del archivo de salida */
+	  // Crea descriptor del archivo de salida
 	  output_fd = open (destino, O_WRONLY | O_CREAT, 0644);	// Se abre el archivo en modo de escritura (lo crea si no existe)
 	  if (output_fd == -1)	// Error al abrir el archivo
 	    {
@@ -100,19 +95,19 @@ hiloDirectorio (void *arg)
 	      return NULL;
 	    }
 
-	  /* Iniciar proceso de copiado */
+	  // Iniciar proceso de copiado
 	  while ((ret_in = read (input_fd, &buffer, BUF_SIZE)) > 0)	// Empezamos a leer el archivo a copiar
 	    {
 	      ret_out = write (output_fd, &buffer, (ssize_t) ret_in);	// Escribimos en el archivo copia
 	      if (ret_out != ret_in)	// Ocurrió un error
 		{
-		  /* Error de escritura */
+		  // Error de escritura
 		  perror ("write");
 		  return NULL;
 		}
 	    }
 	  printf ("Se copio el archivo :)\n");
-	  /* Cerrar descriptores de archivo */
+	  // Cerrar descriptores de archivo 
 	  close (input_fd);
 	  close (output_fd);
 	}
