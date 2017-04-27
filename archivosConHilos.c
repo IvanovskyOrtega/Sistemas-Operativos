@@ -11,8 +11,13 @@
 
 /**
   Autor: Ivan Ortega Victoriano
+  
   Este programa se encarga de copiar los archivos de un directorio especificado
-  a otro directorio destino, haciendo uso de hilos y llamadas al sistema.
+  a otro directorio destino, haciendo uso de hilos y llamadas al sistema del 
+  sistema operativo Linux.
+  
+  Compilación: gcc archivosConHilos.c -o archLinux -lpthread -Wall
+  
 */
 #define BUF_SIZE 8192		// Se define un tamaño de búffer para la lectura de archivos
 
