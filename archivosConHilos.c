@@ -14,7 +14,6 @@
   Este programa se encarga de copiar los archivos de un directorio especificado
   a otro directorio destino, haciendo uso de hilos y llamadas al sistema.
 */
-
 #define BUF_SIZE 8192		// Se define un tamaño de búffer para la lectura de archivos
 
 struct Directorios		// Definición de la estructura de argumentos para la función del hilo
@@ -35,51 +34,50 @@ hiloDirectorio (void *arg)
   DIR *dir;			// Apuntador de tipo struct DIR
   struct dirent *dirEntry;	// Apuntador de tipo struct dirent
   struct stat inode;		// Variable de tipo struct stat
-  struct Directorios *directorios=NULL;	// Variable de tipo struct Directorios
+  struct Directorios *directorios = NULL;	// Variable de tipo struct Directorios
   directorios = (struct Directorios *) arg;	// Cast de los argumentos a tipo struct Directorios
-  char name[300];	// Arreglo que guardará la ruta de cada archivo encontrado en el directorio origen
-  char destino[1000];	// Arreglo que guardará la nueva ruta destino para cada archivo encontrado en el directorio origen
+  char name[300];		// Arreglo que guardará la ruta de cada archivo encontrado en el directorio origen
+  char destino[1000];		// Arreglo que guardará la nueva ruta destino para cada archivo encontrado en el directorio origen
   dir = opendir (directorios->origen);	// Abrimos el directorio con la llamada al sistema opendir()
   printf ("\nSe abrira el directorio: %s\n", directorios->origen);
   printf ("\nDirectorio destino: %s\n", directorios->destino);
-  if (dir == 0)	// Error al abrir directorio
+  if (dir == 0)			// Error al abrir directorio
     {
       perror ("Error al abrir el directorio");
       exit (1);
     }
-  while ((dirEntry = readdir (dir)) != 0) // Empezamos a leer el contenido del directorio
+  while ((dirEntry = readdir (dir)) != 0)	// Empezamos a leer el contenido del directorio
     {
       sprintf (name, "%s/%s", directorios->origen, dirEntry->d_name);	// Almacenamos la ruta de origen de cada entrada leída
       lstat (name, &inode);	// Llamada al sistema lstat para conocer información de la entrada
       // Comprueba el tipo de archivo
       if (S_ISDIR (inode.st_mode))	// Si la entrada es un directorio
 	{
-	  int crearDir;	// Variable para crear el directorio
+	  int crearDir;		// Variable para crear el directorio
 	  struct Directorios *directorios2 =
 	    (struct Directorios *) malloc (sizeof (struct Directorios));
-	  sprintf (directorios2->origen,"%s/", name);	// Almacenamos la nueva ruta de origen para el hilo
-	  sprintf (directorios2->destino, "%s/%s/", directorios->destino,
-		   dirEntry->d_name);	// Almacenamos la nueva ruta de destino para el hilo
-	  if (dirEntry->d_name[0] != '.') // No se copiarán directorios ocultos
+	  sprintf (directorios2->origen, "%s/", name);	// Almacenamos la nueva ruta de origen para el hilo
+	  sprintf (directorios2->destino, "%s/%s/", directorios->destino, dirEntry->d_name);	// Almacenamos la nueva ruta de destino para el hilo
+	  if (dirEntry->d_name[0] != '.')	// No se copiarán directorios ocultos
 	    {
 	      printf ("\nSe encontro el directorio: %s\n",
 		      directorios2->origen);
 	      crearDir = mkdir (directorios2->destino, 0777);	// Creamos el directorio en la carpeta destino
 	      if (crearDir != 0)
-              {
-              	printf ("\nError al crear el directorio\n");
-                return NULL; // Se cancela la ejecución del hilo
-              }
+		{
+		  printf ("\nError al crear el directorio\n");
+		  return NULL;	// Se cancela la ejecución del hilo
+		}
 	      printf ("Creando hilo para su ejecucion\n");
 	      pthread_create (&idThread, NULL, hiloDirectorio, (void *) directorios2);	// Creación del hilo
 	      pthread_join (idThread, NULL);	// Esperamos a la conclusión del hilo
 	    }
 	}
-      else if (S_ISREG (inode.st_mode)) // Si la entrada leída es un registro
+      else if (S_ISREG (inode.st_mode))	// Si la entrada leída es un registro
 	{
 	  printf ("\nArchivo ");
 	  printf (" %s\n", dirEntry->d_name);
-	  sprintf (destino, "%s/%s", directorios->destino, dirEntry->d_name); // Guardamos la ruta del archivo de origen
+	  sprintf (destino, "%s/%s", directorios->destino, dirEntry->d_name);	// Guardamos la ruta del archivo de origen
 	  //printf ("%s\n", destino);
 	  /* Crea descriptor del archivo de entrada */
 	  input_fd = open (name, O_RDONLY);	// Se abre el archivo en modo de lectura
@@ -91,17 +89,17 @@ hiloDirectorio (void *arg)
 
 	  /* Crea descriptor del archivo de salida */
 	  output_fd = open (destino, O_WRONLY | O_CREAT, 0644);	// Se abre el archivo en modo de escritura (lo crea si no existe)
-	  if (output_fd == -1) // Error al abrir el archivo
+	  if (output_fd == -1)	// Error al abrir el archivo
 	    {
 	      perror ("open");
 	      return NULL;
 	    }
 
 	  /* Iniciar proceso de copiado */
-	  while ((ret_in = read (input_fd, &buffer, BUF_SIZE)) > 0) // Empezamos a leer el archivo a copiar
+	  while ((ret_in = read (input_fd, &buffer, BUF_SIZE)) > 0)	// Empezamos a leer el archivo a copiar
 	    {
-	      ret_out = write (output_fd, &buffer, (ssize_t) ret_in); // Escribimos en el archivo copia
-	      if (ret_out != ret_in)  // Ocurrió un error
+	      ret_out = write (output_fd, &buffer, (ssize_t) ret_in);	// Escribimos en el archivo copia
+	      if (ret_out != ret_in)	// Ocurrió un error
 		{
 		  /* Error de escritura */
 		  perror ("write");
@@ -114,7 +112,7 @@ hiloDirectorio (void *arg)
 	  close (output_fd);
 	}
 
-      else if (S_ISLNK (inode.st_mode)) // Si es un link
+      else if (S_ISLNK (inode.st_mode))	// Si es un link
 	printf ("lnk ");
     }
 
@@ -125,16 +123,16 @@ int
 main (int argc, char **argv)
 {
   pthread_t idThread;		//Identificador del hilo
-  struct Directorios *directorios = (struct Directorios*)malloc(sizeof(struct Directorios)); // Estructura para argumentos del hilo
+  struct Directorios *directorios = (struct Directorios *) malloc (sizeof (struct Directorios));	// Estructura para argumentos del hilo
   if (argc != 2)
     {
       printf ("Ingresar rutas de los directorios.\n");
       printf ("Ejemplo: /home/NombreUsuario/Descargas/CarpetaCopiar\n");
       printf ("Ingresa la ruta donde se encuentran los archivos a copiar:\t");
-      scanf ("%s", directorios->origen); // Guardamos la ruta de origen
+      scanf ("%s", directorios->origen);	// Guardamos la ruta de origen
       printf ("\nOrigen : %s\n", directorios->origen);
       printf ("\nIngresa la ruta donde se copiarán los archivos:\t");
-      scanf ("%s", directorios->destino); // Guardamos la ruta destino
+      scanf ("%s", directorios->destino);	// Guardamos la ruta destino
       printf ("\nDestino : %s\n", directorios->destino);
       pthread_create (&idThread, NULL, hiloDirectorio, (void *) directorios);	// Creación del hilo
       pthread_join (idThread, NULL);	// Esperamos a la conclusión del hilo
