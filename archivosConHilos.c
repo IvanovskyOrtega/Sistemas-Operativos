@@ -10,16 +10,17 @@
 #include <pthread.h>
 
 /**
-  Autor: Ivan Ortega Victoriano 
-  
+  Autor: ORTEGA VICTORIANO IVÁN
+
   Este programa se encarga de copiar los archivos de un directorio especificado
-  a otro directorio destino, haciendo uso de hilos y llamadas al sistema del 
+  a otro directorio destino, haciendo uso de hilos y llamadas al sistema del
   sistema operativo Linux.
-  
+
   Compilación: gcc archivosConHilos.c -o archLinux -lpthread -Wall
-  
+
 */
 #define BUF_SIZE 8192		// Se define un tamaño de búffer para la lectura de archivos
+#define MAX 10000		// Se define un máximo de directorios a copiar
 
 struct Directorios		// Definición de la estructura de argumentos para la función del hilo
 {
@@ -32,10 +33,11 @@ void *hiloDirectorio (void *arg);	// Función de argumento para el hilo
 void *
 hiloDirectorio (void *arg)
 {
+  int i = 0, j;			//Contadores
   int input_fd, output_fd;	// Descriptores de archivo de entrada y salida
   ssize_t ret_in, ret_out;	// Numero de bytes regresados por read() y write()
   char buffer[BUF_SIZE];	// Buffer de caractéres
-  pthread_t idThread;		// Creamos un identificador de hilo
+  pthread_t idThread[MAX];	// Creamos un arreglo de identificadores de hilo
   DIR *dir;			// Apuntador de tipo struct DIR
   struct dirent *dirEntry;	// Apuntador de tipo struct dirent
   struct stat inode;		// Variable de tipo struct stat
@@ -73,9 +75,9 @@ hiloDirectorio (void *arg)
 		  printf ("\nError al crear el directorio\n");
 		  return NULL;	// Se cancela la ejecución del hilo
 		}
+	      i++;
 	      printf ("Creando hilo para su ejecucion\n");
-	      pthread_create (&idThread, NULL, hiloDirectorio, (void *) directorios2);	// Creación del hilo
-	      pthread_join (idThread, NULL);	// Esperamos a la conclusión del hilo
+	      pthread_create (&idThread[i], NULL, hiloDirectorio, (void *) directorios2);	// Creación del hilo
 	    }
 	}
       else if (S_ISREG (inode.st_mode))	// Si la entrada leída es un registro
@@ -112,13 +114,17 @@ hiloDirectorio (void *arg)
 		}
 	    }
 	  printf ("Se copio el archivo :)\n");
-	  // Cerrar descriptores de archivo 
+	  // Cerrar descriptores de archivo
 	  close (input_fd);
 	  close (output_fd);
 	}
 
       else if (S_ISLNK (inode.st_mode))	// Si es un link
 	printf ("lnk ");
+    }
+  for (j = 0; j < i; j++)
+    {
+      pthread_join (idThread[j], NULL);	// Esperamos a la conclusión de los hilos creados
     }
 
   return NULL;
@@ -129,7 +135,7 @@ main (int argc, char **argv)
 {
   pthread_t idThread;		//Identificador del hilo
   struct Directorios *directorios = (struct Directorios *) malloc (sizeof (struct Directorios));	// Estructura para argumentos del hilo
-  if (argc != 2)
+  if (argc < 2)
     {
       printf ("Ingresar rutas de los directorios.\n");
       printf ("Ejemplo: /home/NombreUsuario/Descargas/CarpetaCopiar\n");
@@ -142,4 +148,14 @@ main (int argc, char **argv)
       pthread_create (&idThread, NULL, hiloDirectorio, (void *) directorios);	// Creación del hilo
       pthread_join (idThread, NULL);	// Esperamos a la conclusión del hilo
     }
+    else
+      {
+        // Ejemplo de ejecución: ./archLinux /home/user/ruta_origen /home/user/ruta_destino
+        strcpy(directorios->origen,argv[1]);  // El segundo argumento es la ruta origen
+        strcpy(directorios->destino,argv[2]);  // El tercer argumento es la ruta destino
+        printf ("\nOrigen : %s\n", directorios->origen);
+        printf ("\nDestino : %s\n", directorios->destino);
+        pthread_create (&idThread, NULL, hiloDirectorio, (void *) directorios);	// Creación del hilo
+        pthread_join (idThread, NULL);	// Esperamos a la conclusión del hilo
+      }
 }
